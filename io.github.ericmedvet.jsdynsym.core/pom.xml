@@ -24,10 +24,15 @@
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
+    <dependencies>
+        <dependency>
+            <groupId>org.deeplearning4j</groupId>
+            <artifactId>deeplearning4j-core</artifactId>
+            <version>1.0.0-M2.1</version>
+        </dependency>
+    </dependencies>
     <name>jsdynsym-core</name>
     <description>Core components of jsdynsym, a set of abstractions and (few) implementations of simple dynamical systems in Java.</description>
     <artifactId>jsdynsym.core</artifactId>
     <packaging>jar</packaging>
-
 </project>
