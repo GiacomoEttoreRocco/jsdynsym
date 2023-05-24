@@ -51,13 +51,12 @@ public class DQNLearning {
         List<double[]> qValues = targetNetwork.predict(states);
         List<double[]> nextQValues = policyNetwork.predict(nextStates);
         double[] expectedStateActionValues = new double[batchSize];
-        for (int i = 0; i < batchSize; i++) {
-            expectedStateActionValues[i] = rewards[i] + gamma * Arrays.stream(nextQValues.get(i)).max().getAsDouble();
-        }
         double[] statesActionValues = new double[batchSize];
         for (int i = 0; i < batchSize; i++) {
+            expectedStateActionValues[i] = rewards[i] + gamma * Arrays.stream(nextQValues.get(i)).max().getAsDouble();
             statesActionValues[i] = qValues.get(i)[actions[i]];
         }
+
         policyNetwork.fit(statesActionValues, expectedStateActionValues);
     }
     public int selectAction(double[] state) {
