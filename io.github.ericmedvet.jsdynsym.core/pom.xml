@@ -30,6 +30,11 @@
             <artifactId>deeplearning4j-core</artifactId>
             <version>1.0.0-M2.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>nd4j-api</artifactId>
+            <version>1.0.0-M2.1</version>
+        </dependency>
     </dependencies>
     <name>jsdynsym-core</name>
     <description>Core components of jsdynsym, a set of abstractions and (few) implementations of simple dynamical systems in Java.</description>
