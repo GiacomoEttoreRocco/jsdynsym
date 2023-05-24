@@ -25,33 +25,42 @@ public class DQNLearning {
         this.gamma = gamma;
         this.epsilon = epsilon;
     }
-
+    public int getnOutputs() {
+        return nOutputs;
+    }
+    public int getnInputs() {
+        return nInputs;
+    }
     public void optimize_model() {
         if (replayMemory.size() < batchSize) {
             return;
         }
         List<Transition> batch = replayMemory.sample(batchSize);
-        List<Double[]> states = new ArrayList<>(batchSize);
-        List<Integer> actions = new ArrayList<>(batchSize);
-        List<Double> rewards = new ArrayList<>(batchSize);
-        List<Double[]> nextStates = new ArrayList<>(batchSize);
-        for (Transition transition : batch) {
-            states.add(transition.state());
-            actions.add(transition.action());
-            rewards.add(transition.reward());
+        List<double[]> states = new ArrayList<>(batchSize);
+        int[] actions = new int[batchSize];
+        double[] rewards = new double[batchSize];
+        List<double[]> nextStates = new ArrayList<>(batchSize);
+        Transition transition;
+        for(int i = 0; i< batchSize; i++){
+            transition = batch.get(i);
+            states.add(batch.get(i).state());
+            actions[i] = transition.action();
+            rewards[i] = transition.reward();
             nextStates.add(transition.nextState());
         }
-        List<Double[]> qValues = targetNetwork.predict(states); // restituisce una lista dove per ogni stato hai un array di valori Q per ogni azione
-        List<Double[]> nextQValues = policyNetwork.predict(nextStates);
-        List<Double> expectedStateActionValues = new ArrayList<>(nextQValues.stream().map(i -> Collections.max(Arrays.asList(i)) * this.gamma).toList());
-        for (int i = 0; i < expectedStateActionValues.size(); i++) {
-            expectedStateActionValues.set(i, expectedStateActionValues.get(i) + rewards.get(i));
+        List<double[]> qValues = targetNetwork.predict(states);
+        List<double[]> nextQValues = policyNetwork.predict(nextStates);
+        double[] expectedStateActionValues = new double[batchSize];
+        for (int i = 0; i < batchSize; i++) {
+            expectedStateActionValues[i] = rewards[i] + gamma * Arrays.stream(nextQValues.get(i)).max().getAsDouble();
         }
-        List<Double> statesActionValues = IntStream.of(actions.size()).mapToObj(i -> qValues.get(i)[actions.get(i)]).toList();
-        List<Double> loss = IntStream.of(statesActionValues.size()).mapToObj(i -> Math.pow(expectedStateActionValues.get(i) - statesActionValues.get(i), 2)).toList();
+        double[] statesActionValues = new double[batchSize];
+        for (int i = 0; i < batchSize; i++) {
+            statesActionValues[i] = qValues.get(i)[actions[i]];
+        }
         policyNetwork.fit(statesActionValues, expectedStateActionValues);
     }
-    public int selectAction(Double[] state) {
+    public int selectAction(double[] state) {
         double sample = Math.random();
         int action;
         if (sample < this.epsilon) {
@@ -65,16 +74,27 @@ public class DQNLearning {
         Random random = new Random();
         return random.nextInt(this.nOutputs);
     }
-    public int greedyAction(Double[] state) {
-        Double[] qValues = this.policyNetwork.forward(state);
-        return Arrays.asList(qValues).indexOf(Collections.max(Arrays.asList(qValues)));
+    public int greedyAction(double[] state) {
+        double[] qValues = this.policyNetwork.forward(state);
+        //return Arrays.asList(qValues).indexOf(Collections.max(Arrays.asList(qValues)));
+        int maxIndex = -1;
+        double maxValue = Double.NEGATIVE_INFINITY;
+
+        for (int i = 0; i < qValues.length; i++) {
+            if (qValues[i] > maxValue) {
+                maxValue = qValues[i];
+                maxIndex = i;
+            }
+        }
+
+        return maxIndex;
     }
-    public void saveInMemory(Double[] state, int action, double reward, Double[] nextState){
+    public void saveInMemory(double[] state, int action, double reward, double[] nextState){
         this.replayMemory.push(new Transition(state, action, reward, nextState));
     }
-    Double[] previousState;
+    double[] previousState;
     int previousAction;
-    public Integer step(Double[] observation, Double previousReward) {
+    public Integer step(double[] observation, Double previousReward) {
         if (previousReward != null) {
             this.saveInMemory(previousState, previousAction, previousReward, observation);
         }

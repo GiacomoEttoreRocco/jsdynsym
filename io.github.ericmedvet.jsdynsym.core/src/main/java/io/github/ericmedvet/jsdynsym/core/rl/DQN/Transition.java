@@ -1,3 +1,3 @@
 package io.github.ericmedvet.jsdynsym.core.rl.DQN;
 
-public record Transition(Double[] state, int action, double reward, Double[] nextState) {}
+public record Transition(double[] state, int action, double reward, double[] nextState) {}
